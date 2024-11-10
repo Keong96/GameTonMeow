@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Archero-2D-Pixel-TON</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  </head>
+  <body class="dark">
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas"></canvas>
+    </div>
+    <div id="loading-cover" style="display:none;">
+      <div id="unity-loading-bar">
+        <div id="unity-logo"><img src="logo.png"></div>
+        <div id="unity-progress-bar-empty" style="display: none;">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div id="unity-fullscreen-button" style="display: none;"></div>
+    <script>
+      const hideFullScreenButton = "";
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/GAME TON MEOW.loader.js";
+      const config = {
+        dataUrl: buildUrl + "/GAME TON MEOW.data",
+        frameworkUrl: buildUrl + "/GAME TON MEOW.framework.js",
+        codeUrl: buildUrl + "/GAME TON MEOW.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Archero-2D-Pixel-TON",
+        productVersion: "1.0.2",
+      };
+
+      const container = document.querySelector("#unity-container");
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingCover = document.querySelector("#loading-cover");
+      const progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
+      const progressBarFull = document.querySelector("#unity-progress-bar-full");
+      const fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      const spinner = document.querySelector('.spinner');
+
+      const canFullscreen = (function() {
+        for (const key of [
+            'exitFullscreen',
+            'webkitExitFullscreen',
+            'webkitCancelFullScreen',
+            'mozCancelFullScreen',
+            'msExitFullscreen',
+          ]) {
+          if (key in document) {
+            return true;
+          }
+        }
+        return false;
+      }());
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+      }
+      loadingCover.style.display = "";
+
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          spinner.style.display = "none";
+          progressBarEmpty.style.display = "";
+          progressBarFull.style.width = `${100 * progress}%`;
+        }).then((unityInstance) => {
+          loadingCover.style.display = "none";
+          if (canFullscreen) {
+            if (!hideFullScreenButton) {
+              fullscreenButton.style.display = "";
+            }
+            fullscreenButton.onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+          }
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+
+      // function verifyTelegramInitData(initData, botToken) {
+      //   const parsedData = new URLSearchParams(initData);
+      //   const hash = parsedData.get('hash');
+
+      //   parsedData.delete('hash');
+
+      //   const dataCheckString = Array.from(parsedData.entries())
+      //       .map(([key, value]) => `${key}=${value}`)
+      //       .sort()
+      //       .join('\n');
+
+      //   const secretKey = CryptoJS.SHA256(botToken).toString();
+      //   const hmac = CryptoJS.HmacSHA256(dataCheckString, secretKey).toString();
+        
+      //   return hmac === hash;
+      // }
+
+      window.onload = function () {
+            const telegram = window.Telegram.WebApp;
+
+            // Ready event to make sure the app has initialized
+            telegram.ready();
+
+            // Retrieve initData and other user information
+            const initData = telegram.initData;
+            const initDataUnsafe = telegram.initDataUnsafe;
+
+            // Display the initData in the HTML
+            const userInfoDiv = document.getElementById("userInfo");
+
+            // Check if user data exists
+            if (initDataUnsafe && initDataUnsafe.user) {
+              const userId = initDataUnsafe.user.id;
+              const userName = initDataUnsafe.user.username || 'Unknown';
+              const firstName = initDataUnsafe.user.first_name || 'Unknown';
+              const lastName = initDataUnsafe.user.last_name || 'Unknown';
+              
+              unityInstance.SendMessage('GameManager', 'SetUsername', userName);
+
+              // Display user data
+              // userInfoDiv.innerHTML = `
+              //     <p><strong>User ID:</strong> ${userId}</p>
+              //     <p><strong>Username:</strong> ${userName}</p>
+              //     <p><strong>First Name:</strong> ${firstName}</p>
+              //     <p><strong>Last Name:</strong> ${lastName}</p>
+
+              //     <p><strong>Verify initData:</strong> ${verifyTelegramInitData(initData, "6721540977:AAFvVsFRkpObe4uQ0LhbjunpMiI1OXfxBAg")}</p>
+              // `;
+            }
+          }
+
+    </script>
+  </body>
+</html>
